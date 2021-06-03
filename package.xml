@@ -3,9 +3,13 @@
 <package format="3">
   <name>nodl_to_policy</name>
   <version>0.0.0</version>
-  <description>Tool to generate a ROS 2 Access Control Policy from the NoDL description of a ROS system</description>
+  <description>Package to generate a ROS 2 Access Control Policy from the NoDL description of a ROS system</description>
+  <author email="abrar@openrobotics.org">Abrar Rahman Protyasha</author>
   <maintainer email="abrar@openrobotics.org">Abrar Rahman Protyasha</maintainer>
   <license>Apache License 2.0</license>
+
+  <exec_depend>ros2nodl</exec_depend>
+  <exec_depend>nodl_python</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
