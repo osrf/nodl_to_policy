@@ -22,11 +22,18 @@ from ros2cli.command import CommandExtension
 class _NoDLToPolicyCommand(CommandExtension):
     """Convert node interface descriptions exported from packages."""
 
-    def add_arguments(self, parser: argparse.ArgumentParser, cli_name: str, *, argv: Optional[List] = None):
+    def add_arguments(
+            self, parser: argparse.ArgumentParser, cli_name: str, *, argv: Optional[List] = None):
         self._subparser = parser
         # get verb extensions and let them add their arguments
         add_subparsers_on_demand(
-            parser, cli_name, dest='_verb', group_name='nodl_to_policy.verb', required=False, argv=argv)
+            parser,
+            cli_name,
+            dest='_verb',
+            group_name='nodl_to_policy.verb',
+            required=False,
+            argv=argv
+        )
 
     def main(self, *, parser: argparse.ArgumentParser, args: Any) -> int:
         if not hasattr(args, '_verb'):

@@ -21,15 +21,24 @@ import nodl
 from nodl._index import _FILE_EXTENSION as _NODL_FILE_EXTENSION
 from ros2cli.verb import VerbExtension
 
+
 class _ConvertVerb(VerbExtension):
     """Convert NoDL XML documents to ROS 2 Access Control Policies"""
 
     def add_arguments(self, parser: argparse.ArgumentParser, cli_name: None = None) -> None:
-        arg = parser.add_argument('NODL_FILE_PATH', nargs='*', default=[], metavar='file', type=pathlib.Path, help=f'Specific {_NODL_FILE_EXTENSION} file(s) to convert.')
+        arg = parser.add_argument(
+            'NODL_FILE_PATH',
+            nargs='*',
+            default=[],
+            metavar='file',
+            type=pathlib.Path,
+            help=f'Specific {_NODL_FILE_EXTENSION} file(s) to convert.'
+        )
         arg.completer = FilesCompleter(allowednames=[_NODL_FILE_EXTENSION], directories=False)
 
         parser.add_argument('-p', '--print', action='store_true', help='Print converted output.')
 
     def main(self, *, args: argparse.Namespace) -> int:
         # TO-DO: Make use of "conversion" API to do this
+        print("hello world")
         return 0
