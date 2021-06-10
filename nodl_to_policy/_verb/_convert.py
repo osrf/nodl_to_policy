@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import argparse
-import importlib.resources
 import pathlib
 from argcomplete.completers import FilesCompleter
 
@@ -21,16 +21,18 @@ import nodl
 from nodl._index import _FILE_EXTENSION as _NODL_FILE_EXTENSION
 from ros2cli.verb import VerbExtension
 
-
-_POLICY_FILE_EXTENSION = '.nodl.xml'
-
+from nodl_to_policy.policy import (
+    convert_to_policy,
+    write_policy,
+    _POLICY_FILE_EXTENSION
+)
 
 class _ConvertVerb(VerbExtension):
     """Convert NoDL XML documents to ROS 2 Access Control Policies"""
 
     def add_arguments(self, parser: argparse.ArgumentParser, cli_name: None = None) -> None:
         arg = parser.add_argument(
-            'NODL_FILE_PATH',
+            'NODL_FILE_PATHS',
             nargs='*',
             default=[],
             metavar='nodl_file',
@@ -49,4 +51,22 @@ class _ConvertVerb(VerbExtension):
         parser.add_argument('-p', '--print', action='store_true', help='Print converted output.')
 
     def main(self, *, args: argparse.Namespace) -> int:
+        if not args.NODL_FILE_PATHS:
+            print('No files to validate', file=sys.stderr)
+            return 1
+
+        for nodl_file_path in args.NODL_FILE_PATHS:
+            if not nodl_file_path.is_file():
+                print(f'{nodl_file_path} is not a file')
+                return 1
+
+            try:
+                nodl_description = nodl.parse(path=nodl_file_path)
+            except nodl.errors.NoDLError as e:
+                print(f'Failed to parse {nodl_file_path}', file=sys.stderr)
+                print(e, file=sys.stderr)
+                return 1
+
+            policy = convert_to_policy(args.POLICY_FILE_PATH, nodl_description)
+            write_policy(policy, args.POLICY_FILE_PATH)
         return 0
