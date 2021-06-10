@@ -15,8 +15,8 @@
 import argparse
 from typing import Any, List, Optional
 
-from ros2cli.command import add_subparsers_on_demand
 from ros2cli.command import CommandExtension
+from ros2cli.command import add_subparsers_on_demand
 
 
 class _NoDLToPolicyCommand(CommandExtension):

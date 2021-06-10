@@ -12,14 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import importlib.resources
 import argparse
+import importlib.resources
 import pathlib
-
 from argcomplete.completers import FilesCompleter
+
 import nodl
 from nodl._index import _FILE_EXTENSION as _NODL_FILE_EXTENSION
 from ros2cli.verb import VerbExtension
+
+
+_POLICY_FILE_EXTENSION = '.nodl.xml'
 
 
 class _ConvertVerb(VerbExtension):
@@ -30,15 +33,20 @@ class _ConvertVerb(VerbExtension):
             'NODL_FILE_PATH',
             nargs='*',
             default=[],
-            metavar='file',
+            metavar='nodl_file',
             type=pathlib.Path,
             help=f'Specific {_NODL_FILE_EXTENSION} file(s) to convert.'
         )
         arg.completer = FilesCompleter(allowednames=[_NODL_FILE_EXTENSION], directories=False)
 
+        parser.add_argument(
+            'POLICY_FILE_PATH',
+            metavar='policy_file',
+            type=pathlib.Path,
+            help='Path of the policy XML file'
+        ).completer = FilesCompleter(allowednames=[_POLICY_FILE_EXTENSION], directories=False)
+
         parser.add_argument('-p', '--print', action='store_true', help='Print converted output.')
 
     def main(self, *, args: argparse.Namespace) -> int:
-        # TO-DO: Make use of "conversion" API to do this
-        print("hello world")
         return 0
