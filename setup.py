@@ -25,6 +25,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License 2.0',
         'Programming Language :: Python',
+        'Topic :: Software Development',
     ],
     description='NoDL description to ROS 2 policy generator',
     long_description='Package to generate a ROS 2 Access Control Policy from \
@@ -34,5 +35,11 @@ setup(
     entry_points={
         'console_scripts': [
         ],
+        'ros2cli.command': [
+            'nodl_to_policy = nodl_to_policy._command._nodl_to_policy:_NoDLToPolicyCommand',
+        ],
+        'nodl_to_policy.verb': [
+            'convert = nodl_to_policy._verb._convert:_ConvertVerb'
+        ]
     },
 )
