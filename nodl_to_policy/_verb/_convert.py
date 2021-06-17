@@ -69,5 +69,6 @@ class _ConvertVerb(VerbExtension):
                 return 1
 
             policy = convert_to_policy(args.POLICY_FILE_PATH, nodl_description)
-            write_policy(args.POLICY_FILE_PATH, policy)
+            write_policy(args.POLICY_FILE_PATH, policy, args.print)
+
         return 0

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import pathlib
+import sys
 from typing import Dict, List, Optional, Tuple
 
 from lxml import etree
@@ -122,9 +123,11 @@ def convert_to_policy(policy_file_path: pathlib.Path, nodl_description: List[Nod
     return policy
 
 
-def write_policy(policy_file_path: pathlib.Path, policy: etree._ElementTree) -> None:
+def write_policy(policy_file_path: pathlib.Path, policy: etree._ElementTree, print_policy) -> None:
     with open(policy_file_path, 'w') as stream:
         dump_policy(policy, stream)
+    if print_policy:
+        dump_policy(policy, sys.stdout)
 
 
 def _get_topics_by_role(topics: Optional[Dict]) -> Tuple[Dict, Dict]:
