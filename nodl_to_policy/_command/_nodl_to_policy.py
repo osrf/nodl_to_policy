@@ -24,8 +24,8 @@ class _NoDLToPolicyCommand(CommandExtension):
 
     def add_arguments(
             self, parser: argparse.ArgumentParser, cli_name: str, *, argv: Optional[List] = None):
+        """Get verb extensions and let them add their arguments."""
         self._subparser = parser
-        # get verb extensions and let them add their arguments
         add_subparsers_on_demand(
             parser,
             cli_name,
@@ -36,6 +36,8 @@ class _NoDLToPolicyCommand(CommandExtension):
         )
 
     def main(self, *, parser: argparse.ArgumentParser, args: Any) -> int:
+        """Delegating to a verb's entrypoint, unless no verb was passed."""
+
         if not hasattr(args, '_verb'):
             # in case no verb was passed
             self._subparser.print_help()

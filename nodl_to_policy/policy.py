@@ -36,6 +36,8 @@ _POLICY_FILE_EXTENSION = '.policy.xml'
 
 
 def get_policy(policy_file_path: pathlib.Path) -> etree._ElementTree:
+    """Loads (or creates) a policy element in an LXML ElementTree"""
+
     if policy_file_path.is_file():
         return load_policy(policy_file_path)
     else:
@@ -47,10 +49,13 @@ def get_policy(policy_file_path: pathlib.Path) -> etree._ElementTree:
 
 
 def get_profile(policy: etree._ElementTree, node_name: str) -> etree._ElementTree:
+    """Returns a node's respective profile tag in an LXML ElementTree"""
+
     enclave = policy.find(path=f'enclaves/enclave[@path=""]')
     if enclave is None:
         enclave = etree.Element('enclave')
         # unqualified enclave path for now, refer to security enclaves design article
+        # TODO: Verify that this is how enclave paths should work
         enclave.attrib['path'] = ''
         profiles = etree.Element('profiles')
         enclave.append(profiles)
@@ -61,6 +66,7 @@ def get_profile(policy: etree._ElementTree, node_name: str) -> etree._ElementTre
     if profile is None:
         profile = etree.Element('profile')
         # namespace information not provided in NoDL description yet
+        # TODO: Verify that this is how node namespaces should work
         profile.attrib['ns'] = ''
         profile.attrib['node'] = node_name
         profiles = enclave.find('profiles')
@@ -73,6 +79,8 @@ def get_permission(
     profile: etree._ElementTree, permission_type: str, rule_type: str,
     rule_expression: str
 ) -> etree._ElementTree:
+    """Returns (or creates) an appropriate permission (actions/services/topics) tag."""
+
     permissions = profile.find(path=f'{permission_type}s[@{rule_type}="{rule_expression}"]')
     if permissions is None:
         permissions = etree.Element(permission_type + 's')
@@ -85,6 +93,8 @@ def add_permission(
     profile: etree._ElementTree, node: Node, permission_type: str, rule_type: str,
     rule_expression: str, expressions: Dict
 ) -> None:
+    """For each service/action/topic, the actual expression tag is added to the ElementTree."""
+
     # get permission
     permissions = get_permission(profile, permission_type, rule_type, rule_expression)
 
@@ -103,17 +113,22 @@ def add_permission(
 def convert_to_policy(
     policy_file_path: pathlib.Path, nodl_description: List[Node]
 ) -> etree._ElementTree:
+    """Handles the main logic for conversion from NoDL description to access control policy."""
+
     policy = get_policy(policy_file_path)
 
     for node in nodl_description:
-        # profile: need to find enclave path and node namespace somehow
+        # Profile: need to find enclave path and node namespace somehow
         profile = get_profile(policy, node.name)
 
-        # parameters? Not specified in access control policy
+        # TODO: Parameters? Not specified in access control policy
         subscribe_topics, publish_topics = _get_topics_by_role(node.topics)
         reply_services, request_services = _get_services_by_role(node.services)
         reply_actions, request_actions = _get_actions_by_role(node.actions)
 
+        # Permissions are not added if any of the expression collections are empty
+        # TODO: Refactor `_get_[]_by_role` to return Optional[Dict]
+        # This helps make the proceeding logic look simpler
         if len(subscribe_topics) != 0:
             add_permission(profile, node, 'topic', 'subscribe', 'ALLOW', subscribe_topics)
         if len(publish_topics) != 0:
@@ -131,6 +146,8 @@ def convert_to_policy(
 
 
 def write_policy(
+    """Write a generated policy ElementTree to an XML file, and optionally to the console."""
+
     policy_file_path: pathlib.Path, policy: etree._ElementTree, print_policy
 ) -> None:
     with open(policy_file_path, 'w') as stream:
@@ -169,4 +186,4 @@ def _get_services_by_role(services: Dict) -> Tuple[Dict, Dict]:
 
 
 def _get_actions_by_role(actions: Dict) -> Tuple[Dict, Dict]:
-    return _get_services_by_role(actions)
+    return _get_services_by_role(actions)  # `nodl.types.Action` also share ServerClientRole enums

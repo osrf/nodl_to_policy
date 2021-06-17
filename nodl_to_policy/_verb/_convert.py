@@ -32,6 +32,8 @@ class _ConvertVerb(VerbExtension):
     """Convert NoDL XML documents to ROS 2 Access Control Policies"""
 
     def add_arguments(self, parser: argparse.ArgumentParser, cli_name: None = None) -> None:
+        """Argument addition for the `convert` verb."""
+
         arg = parser.add_argument(
             'NODL_FILE_PATHS',
             nargs='*',
@@ -52,6 +54,8 @@ class _ConvertVerb(VerbExtension):
         parser.add_argument('-p', '--print', action='store_true', help='Print converted output.')
 
     def main(self, *, args: argparse.Namespace) -> int:
+        """High level logic employed by the `convert` verb."""
+
         if not args.NODL_FILE_PATHS:
             print('No files to validate', file=sys.stderr)
             return 1
