@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import sys
 import argparse
 import pathlib
 from argcomplete.completers import FilesCompleter
@@ -68,5 +69,5 @@ class _ConvertVerb(VerbExtension):
                 return 1
 
             policy = convert_to_policy(args.POLICY_FILE_PATH, nodl_description)
-            write_policy(policy, args.POLICY_FILE_PATH)
+            write_policy(args.POLICY_FILE_PATH, policy)
         return 0
