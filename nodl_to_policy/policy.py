@@ -14,7 +14,7 @@
 
 import pathlib
 import sys
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 from lxml import etree
 
@@ -36,7 +36,6 @@ _POLICY_FILE_EXTENSION = '.policy.xml'
 
 
 def get_policy(policy_file_path: pathlib.Path) -> etree._ElementTree:
-    # Reference: https://github.com/ros2/sros2/blob/e5e90f05c3d800c51648e02d48d30ed4d6158820/sros2/sros2/verb/generate_policy.py#L60-L68
     if policy_file_path.is_file():
         return load_policy(policy_file_path)
     else:
@@ -51,7 +50,7 @@ def get_profile(policy: etree._ElementTree, node_name: str) -> etree._ElementTre
     enclave = policy.find(path=f'enclaves/enclave[@path=""]')
     if enclave is None:
         enclave = etree.Element('enclave')
-        # unqualified enclave path for now, refer to https://design.ros2.org/articles/ros2_security_enclaves.html
+        # unqualified enclave path for now, refer to security enclaves design article
         enclave.attrib['path'] = ''
         profiles = etree.Element('profiles')
         enclave.append(profiles)
@@ -70,7 +69,10 @@ def get_profile(policy: etree._ElementTree, node_name: str) -> etree._ElementTre
     return profile
 
 
-def get_permission(profile: etree._ElementTree, permission_type: str, rule_type: str, rule_expression: str) -> etree._ElementTree:
+def get_permission(
+    profile: etree._ElementTree, permission_type: str, rule_type: str,
+    rule_expression: str
+) -> etree._ElementTree:
     permissions = profile.find(path=f'{permission_type}s[@{rule_type}="{rule_expression}"]')
     if permissions is None:
         permissions = etree.Element(permission_type + 's')
@@ -79,7 +81,10 @@ def get_permission(profile: etree._ElementTree, permission_type: str, rule_type:
     return permissions
 
 
-def add_permission(profile: etree._ElementTree, node: Node, permission_type: str, rule_type: str, rule_expression: str, expressions: Dict) -> None:
+def add_permission(
+    profile: etree._ElementTree, node: Node, permission_type: str, rule_type: str,
+    rule_expression: str, expressions: Dict
+) -> None:
     # get permission
     permissions = get_permission(profile, permission_type, rule_type, rule_expression)
 
@@ -95,7 +100,9 @@ def add_permission(profile: etree._ElementTree, node: Node, permission_type: str
         permissions.append(permission)
 
 
-def convert_to_policy(policy_file_path: pathlib.Path, nodl_description: List[Node]) -> etree._ElementTree:
+def convert_to_policy(
+    policy_file_path: pathlib.Path, nodl_description: List[Node]
+) -> etree._ElementTree:
     policy = get_policy(policy_file_path)
 
     for node in nodl_description:
@@ -123,14 +130,16 @@ def convert_to_policy(policy_file_path: pathlib.Path, nodl_description: List[Nod
     return policy
 
 
-def write_policy(policy_file_path: pathlib.Path, policy: etree._ElementTree, print_policy) -> None:
+def write_policy(
+    policy_file_path: pathlib.Path, policy: etree._ElementTree, print_policy
+) -> None:
     with open(policy_file_path, 'w') as stream:
         dump_policy(policy, stream)
     if print_policy:
         dump_policy(policy, sys.stdout)
 
 
-def _get_topics_by_role(topics: Optional[Dict]) -> Tuple[Dict, Dict]:
+def _get_topics_by_role(topics: Dict) -> Tuple[Dict, Dict]:
     subscribe_topics = {}
     publish_topics = {}
     for _, topic in topics.items():
@@ -144,7 +153,7 @@ def _get_topics_by_role(topics: Optional[Dict]) -> Tuple[Dict, Dict]:
     return subscribe_topics, publish_topics
 
 
-def _get_services_by_role(services: Optional[Dict]) -> Tuple[Dict, Dict]:
+def _get_services_by_role(services: Dict) -> Tuple[Dict, Dict]:
     reply_services = {}
     request_services = {}
     for _, service in services.items():
@@ -159,5 +168,5 @@ def _get_services_by_role(services: Optional[Dict]) -> Tuple[Dict, Dict]:
     return reply_services, request_services
 
 
-def _get_actions_by_role(actions: Optional[Dict]) -> Tuple[Dict, Dict]:
+def _get_actions_by_role(actions: Dict) -> Tuple[Dict, Dict]:
     return _get_services_by_role(actions)

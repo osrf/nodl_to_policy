@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import sys
 import argparse
 import pathlib
@@ -27,6 +26,7 @@ from nodl_to_policy.policy import (
     write_policy,
     _POLICY_FILE_EXTENSION
 )
+
 
 class _ConvertVerb(VerbExtension):
     """Convert NoDL XML documents to ROS 2 Access Control Policies"""
