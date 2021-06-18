@@ -36,8 +36,7 @@ _POLICY_FILE_EXTENSION = '.policy.xml'
 
 
 def get_policy(policy_file_path: pathlib.Path) -> etree._ElementTree:
-    """Loads (or creates) a policy element in an LXML ElementTree"""
-
+    """Load (or creates) a policy element in an LXML ElementTree."""
     if policy_file_path.is_file():
         return load_policy(policy_file_path)
     else:
@@ -49,8 +48,7 @@ def get_policy(policy_file_path: pathlib.Path) -> etree._ElementTree:
 
 
 def get_profile(policy: etree._ElementTree, node_name: str) -> etree._ElementTree:
-    """Returns a node's respective profile tag in an LXML ElementTree"""
-
+    """Return a node's respective profile tag in an LXML ElementTree."""
     enclave = policy.find(path=f'enclaves/enclave[@path=""]')
     if enclave is None:
         enclave = etree.Element('enclave')
@@ -79,8 +77,7 @@ def get_permission(
     profile: etree._ElementTree, permission_type: str, rule_type: str,
     rule_expression: str
 ) -> etree._ElementTree:
-    """Returns (or creates) an appropriate permission (actions/services/topics) tag."""
-
+    """Return (or create) an appropriate permission (actions/services/topics) tag."""
     permissions = profile.find(path=f'{permission_type}s[@{rule_type}="{rule_expression}"]')
     if permissions is None:
         permissions = etree.Element(permission_type + 's')
@@ -94,7 +91,6 @@ def add_permission(
     rule_expression: str, expressions: Dict
 ) -> None:
     """For each service/action/topic, the actual expression tag is added to the ElementTree."""
-
     # get permission
     permissions = get_permission(profile, permission_type, rule_type, rule_expression)
 
@@ -113,8 +109,7 @@ def add_permission(
 def convert_to_policy(
     policy_file_path: pathlib.Path, nodl_description: List[Node]
 ) -> etree._ElementTree:
-    """Handles the main logic for conversion from NoDL description to access control policy."""
-
+    """Handle the main logic for conversion from NoDL description to access control policy."""
     policy = get_policy(policy_file_path)
 
     for node in nodl_description:
@@ -146,10 +141,9 @@ def convert_to_policy(
 
 
 def write_policy(
-    """Write a generated policy ElementTree to an XML file, and optionally to the console."""
-
     policy_file_path: pathlib.Path, policy: etree._ElementTree, print_policy
 ) -> None:
+    """Write a generated policy ElementTree to an XML file, and optionally to the console."""
     with open(policy_file_path, 'w') as stream:
         dump_policy(policy, stream)
     if print_policy:
