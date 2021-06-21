@@ -34,45 +34,58 @@ class _ConvertVerb(VerbExtension):
     def add_arguments(self, parser: argparse.ArgumentParser, cli_name: None = None) -> None:
         """Argument addition for the `convert` verb."""
 
-        arg = parser.add_argument(
-            'NODL_FILE_PATHS',
-            nargs='*',
-            default=[],
-            metavar='nodl_file',
-            type=pathlib.Path,
-            help=f'Specific {_NODL_FILE_EXTENSION} file(s) to convert.'
-        )
-        arg.completer = FilesCompleter(allowednames=[_NODL_FILE_EXTENSION], directories=False)
-
-        parser.add_argument(
-            'POLICY_FILE_PATH',
-            metavar='policy_file',
-            type=pathlib.Path,
-            help='Path of the policy XML file'
-        ).completer = FilesCompleter(allowednames=[_POLICY_FILE_EXTENSION], directories=False)
-
         parser.add_argument('-p', '--print', action='store_true', help='Print converted output.')
+
+        arg = parser.add_argument(
+            '-o',
+            '--output',
+            help='Path of the output policy XML file (default: `./out.policy.xml`)',
+            metavar='policy_file',
+            default='out' + _POLICY_FILE_EXTENSION,
+            dest='policy_file_path',
+            type=pathlib.Path
+        )
+        arg.completer = FilesCompleter(  # type: ignore
+            allowednames=[_POLICY_FILE_EXTENSION], directories=False)
+
+        required_named = parser.add_argument_group('required named arguments')
+        arg = required_named.add_argument(
+            '-i',
+            '--input',
+            help=f'Path of the input {_NODL_FILE_EXTENSION} file to convert.',
+            metavar='nodl_file',
+            dest='nodl_file_path',
+            type=pathlib.Path,
+            required=True
+        )
+        arg.completer = FilesCompleter(  # type: ignore
+            allowednames=[_NODL_FILE_EXTENSION], directories=False)
 
     def main(self, *, args: argparse.Namespace) -> int:
         """High level logic employed by the `convert` verb."""
-
-        if not args.NODL_FILE_PATHS:
+        nodl_file_path = args.nodl_file_path
+        if not nodl_file_path:
             print('No files to validate', file=sys.stderr)
             return 1
 
-        for nodl_file_path in args.NODL_FILE_PATHS:
-            if not nodl_file_path.is_file():
-                print(f'{nodl_file_path} is not a file')
-                return 1
+        if not nodl_file_path.is_file():
+            print(f'{nodl_file_path} is not a file')
+            return 1
 
-            try:
-                nodl_description = nodl.parse(path=nodl_file_path)
-            except nodl.errors.NoDLError as e:
-                print(f'Failed to parse {nodl_file_path}', file=sys.stderr)
-                print(e, file=sys.stderr)
-                return 1
+        try:
+            nodl_description = nodl.parse(path=nodl_file_path)
+        except nodl.errors.InvalidNoDLError as e:
+            print(f'Failed to parse {nodl_file_path}', file=sys.stderr)
+            print(e, file=sys.stderr)
+            return 1
 
-            policy = convert_to_policy(args.POLICY_FILE_PATH, nodl_description)
-            write_policy(args.POLICY_FILE_PATH, policy, args.print)
+        policy_file_path = args.policy_file_path
+        if not str(policy_file_path).endswith(_POLICY_FILE_EXTENSION):
+            print(f'`{policy_file_path}` is not a valid policy XML',
+                  ' file (must have extension `.policy.xml`)', file=sys.stderr)
+            return 1
+
+        policy = convert_to_policy(policy_file_path, nodl_description)
+        write_policy(policy_file_path, policy, args.print)
 
         return 0
