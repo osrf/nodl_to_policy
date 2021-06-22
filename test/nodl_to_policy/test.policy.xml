@@ -1,0 +1,30 @@
+<policy version="0.2.0">
+  <enclaves>
+    <enclave path="">
+      <profiles>
+        <profile node="node_1" ns="">
+          <topics publish="ALLOW">
+            <topic>chatter</topic>
+          </topics>
+        </profile>
+        <profile node="node_2" ns="">
+          <actions execute="ALLOW">
+            <action>example_action</action>
+          </actions>
+          <actions call="ALLOW">
+            <action>example_action</action>
+          </actions>
+          <services reply="ALLOW">
+            <service>example_service_2</service>
+          </services>
+          <services request="ALLOW">
+            <service>example_service</service>
+          </services>
+          <topics subscribe="ALLOW">
+            <topic>foo/bar</topic>
+          </topics>
+        </profile>
+      </profiles>
+    </enclave>
+  </enclaves>
+</policy>
