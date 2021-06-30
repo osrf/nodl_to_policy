@@ -1,4 +1,19 @@
 from setuptools import setup
+import os
+
+
+def package_files(directory):
+    paths = []
+    for (path, directories, filenames) in os.walk(directory):
+        for filename in filenames:
+            if '.py' not in filename:
+                paths.append(os.path.join('..', path, filename))
+    return paths
+
+
+extra_files = (
+    package_files('nodl_to_policy/_common')
+)
 
 package_name = 'nodl_to_policy'
 
@@ -41,5 +56,8 @@ setup(
         'nodl_to_policy.verb': [
             'convert = nodl_to_policy._verb._convert:_ConvertVerb'
         ]
+    },
+    package_data={
+        'nodl_to_policy': extra_files,
     },
 )

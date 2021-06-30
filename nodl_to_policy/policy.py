@@ -14,7 +14,7 @@
 
 import pathlib
 import sys
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 from lxml import etree
 
@@ -23,6 +23,13 @@ from nodl.types import (
     Node,
     PubSubRole,
     ServerClientRole,
+)
+
+from nodl_to_policy._common._profile import (
+    common_subscribe_topics,
+    common_publish_topics,
+    common_reply_services,
+    common_request_services,
 )
 
 from sros2.policy import (
@@ -36,7 +43,16 @@ _POLICY_FILE_EXTENSION = '.policy.xml'
 
 
 def get_policy(policy_file_path: pathlib.Path) -> etree._ElementTree:
-    """Load (or creates) a policy element in an LXML ElementTree."""
+    """
+    Load (or creates) a policy element in an LXML ElementTree.
+
+    :param policy_file_path: POSIX path of the policy file.
+    :type policy_file_path: pathlib.Path
+    :raises FileNotFoundError: If the given path is not a file.
+    :raises RuntimeError: If the policy file is invalid.
+    :return: LXML ElementTree structure representing a "policy" tag.
+    :rtype: etree._ElementTree
+    """
     if policy_file_path.is_file():
         return load_policy(policy_file_path)
     else:
@@ -48,24 +64,33 @@ def get_policy(policy_file_path: pathlib.Path) -> etree._ElementTree:
 
 
 def get_profile(policy: etree._ElementTree, node_name: str) -> etree._ElementTree:
-    """Return a node's respective profile tag in an LXML ElementTree."""
-    enclave = policy.find(path=f'enclaves/enclave[@path=""]')
+    """
+    Return a node's respective profile tag in an LXML ElementTree.
+
+    :param policy: LXML ElementTree structure representing a "policy" tag.
+    :type policy: etree._ElementTree
+    :param node_name: Node name for which profile is inquired.
+    :type node_name: str
+    :return: LXML ElementTree structure representing a "profile" tag.
+    :rtype: etree._ElementTree
+    """
+    enclave = policy.find(path=f'enclaves/enclave[@path="/"]')
     if enclave is None:
         enclave = etree.Element('enclave')
         # unqualified enclave path for now, refer to security enclaves design article
-        # TODO: Verify that this is how enclave paths should work
-        enclave.attrib['path'] = ''
+        # TODO(aprotyas): Verify that this is how enclave paths should work
+        enclave.attrib['path'] = '/'
         profiles = etree.Element('profiles')
         enclave.append(profiles)
         enclaves = policy.find('enclaves')
         enclaves.append(enclave)
 
-    profile = enclave.find(path=f'profiles/profile[@ns=""][@node="{node_name}"]')
+    profile = enclave.find(path=f'profiles/profile[@ns="/"][@node="{node_name}"]')
     if profile is None:
         profile = etree.Element('profile')
         # namespace information not provided in NoDL description yet
-        # TODO: Verify that this is how node namespaces should work
-        profile.attrib['ns'] = ''
+        # TODO(aprotyas): Verify that this is how node namespaces should work
+        profile.attrib['ns'] = '/'
         profile.attrib['node'] = node_name
         profiles = enclave.find('profiles')
         profiles.append(profile)
@@ -77,7 +102,20 @@ def get_permission(
     profile: etree._ElementTree, permission_type: str, rule_type: str,
     rule_expression: str
 ) -> etree._ElementTree:
-    """Return (or create) an appropriate permission (actions/services/topics) tag."""
+    """
+    Return (or create) an appropriate permission (actions/services/topics) tag.
+
+    :param profile: LXML ElementTree structure representing a "policy" tag.
+    :type policy: etree._ElementTree
+    :param permission_type: One of service/action/topic.
+    :type permission_type: str
+    :param rule_type: The type of topic (pub/sub) or service/action (req/reply).
+    :type rule_type: str
+    :param rule_expression: 'ALLOW' or 'DENY'
+    :type rule_expression: str
+    :return: LXML ElementTree structure representing a services/actions/topics tag.
+    :rtype: etree._ElementTree
+    """
     permissions = profile.find(path=f'{permission_type}s[@{rule_type}="{rule_expression}"]')
     if permissions is None:
         permissions = etree.Element(permission_type + 's')
@@ -88,11 +126,27 @@ def get_permission(
 
 def add_permission(
     profile: etree._ElementTree, node: Node, permission_type: str, rule_type: str,
-    rule_expression: str, expressions: Dict
+    expressions: Union[Dict, List]
 ) -> None:
-    """For each service/action/topic, the actual expression tag is added to the ElementTree."""
+    """
+    For each service/action/topic, the actual expression tag is added to the ElementTree.
+
+    :param profile: LXML ElementTree structure representing a "policy" tag.
+    :type policy: etree._ElementTree
+    :param node: A Node object primarily used to extract a node's name.
+    :type node: nodl.types.Node
+    :param permission_type: One of service/action/topic.
+    :type permission_type: str
+    :param rule_type: The type of topic (pub/sub) or service/action (req/reply).
+    :type rule_type: str
+    :param expressions: A collection of specific service/action/topic names.
+    :type expressions: Union[Dict, List]
+    """
+    # do not create a permissions tag if not required
+    if not expressions:
+        return
     # get permission
-    permissions = get_permission(profile, permission_type, rule_type, rule_expression)
+    permissions = get_permission(profile, permission_type, rule_type, 'ALLOW')
 
     # add permission
     for expression_name in expressions:
@@ -106,44 +160,86 @@ def add_permission(
         permissions.append(permission)
 
 
+def add_common_permissions(profile: etree._ElementTree, node: Node) -> None:
+    """
+    `add_permission` but for each of the common services/topics/actions.
+
+    :param profile: LXML ElementTree structure representing a "policy" tag.
+    :type policy: etree._ElementTree
+    :param node: A Node object primarily used to extract a node's name.
+    :type node: nodl.types.Node
+    """
+    permission_and_rule_types = {
+        'topic': ({'subscribe': common_subscribe_topics()}, {'publish': common_publish_topics()}),
+        'service': ({'reply': common_reply_services()}, {'request': common_request_services()})}
+
+    # For each of the default 'topic'/'service', add that tag under the appropriate permissions tag
+    for permission_type, rule_types in permission_and_rule_types.items():
+        for rule_type_dict in rule_types:
+            for rule_type, allowed_items in rule_type_dict.items():
+                add_permission(
+                    profile,
+                    node,
+                    permission_type,
+                    rule_type,
+                    [item.text for item in allowed_items])
+
+
 def convert_to_policy(
     policy_file_path: pathlib.Path, nodl_description: List[Node]
 ) -> etree._ElementTree:
-    """Handle the main logic for conversion from NoDL description to access control policy."""
+    """
+    Handle the main logic for conversion from NoDL description to access control policy.
+
+    :param policy_file_path: POSIX path of the policy file.
+    :type policy_file_path: pathlib.Path
+    :param nodl_description: The list of `nodl.Node` objects to add to the policy.
+    :type nodl_description: List[nodl.Node]
+    :raises FileNotFoundError: If the given path is not a file.
+    :raises RuntimeError: If the policy file is invalid.
+    :return: LXML ElementTree structure representing a completed "policy" tag.
+    :rtype: etree._ElementTree
+    """
     policy = get_policy(policy_file_path)
 
     for node in nodl_description:
         # Profile: need to find enclave path and node namespace somehow
         profile = get_profile(policy, node.name)
+        # First add all the common (default) permissions for a ROS node
+        add_common_permissions(profile, node)
 
-        # TODO: Parameters? Not specified in access control policy
+        # TODO(aprotyas): Parameters? Not specified in access control policy
         subscribe_topics, publish_topics = _get_topics_by_role(node.topics)
         reply_services, request_services = _get_services_by_role(node.services)
         reply_actions, request_actions = _get_actions_by_role(node.actions)
 
-        # Permissions are not added if any of the expression collections are empty
-        # TODO: Refactor `_get_[]_by_role` to return Optional[Dict]
-        # This helps make the proceeding logic look simpler
-        if len(subscribe_topics) != 0:
-            add_permission(profile, node, 'topic', 'subscribe', 'ALLOW', subscribe_topics)
-        if len(publish_topics) != 0:
-            add_permission(profile, node, 'topic', 'publish', 'ALLOW', publish_topics)
-        if len(reply_services) != 0:
-            add_permission(profile, node, 'service', 'reply', 'ALLOW', reply_services)
-        if len(request_services) != 0:
-            add_permission(profile, node, 'service', 'request', 'ALLOW', request_services)
-        if len(reply_actions) != 0:
-            add_permission(profile, node, 'action', 'execute', 'ALLOW', reply_actions)
-        if len(request_actions) != 0:
-            add_permission(profile, node, 'action', 'call', 'ALLOW', request_actions)
+        permission_and_rule_types = {
+            'topic': ({'subscribe': subscribe_topics}, {'publish': publish_topics}),
+            'service': ({'reply': reply_services}, {'request': request_services}),
+            'action': ({'execute': reply_actions}, {'call': request_actions})}
+
+        for permission_type, rule_types in permission_and_rule_types.items():
+            for rule_type_dict in rule_types:
+                for rule_type, allowed_items in rule_type_dict.items():
+                    add_permission(profile, node, permission_type, rule_type, allowed_items)
 
     return policy
 
 
 def write_policy(
-    policy_file_path: pathlib.Path, policy: etree._ElementTree, print_policy
+    policy_file_path: pathlib.Path, policy: etree._ElementTree, print_policy: bool
 ) -> None:
-    """Write a generated policy ElementTree to an XML file, and optionally to the console."""
+    """
+    Write a generated policy ElementTree to an XML file, and optionally to the console.
+
+    :param policy_file_path: POSIX path of the policy file.
+    :type policy_file_path: pathlib.Path
+    :param policy: LXML ElementTree structure representing a completed "policy" tag.
+    :type policy: etree._ElementTree
+    :param print_policy: Flag to determine whether converted policy gets dumped to `stdout`
+    :type print_policy: bool
+    :raises RuntimeError: If the policy structure is invalid.
+    """
     with open(policy_file_path, 'w') as stream:
         dump_policy(policy, stream)
     if print_policy:
@@ -151,6 +247,14 @@ def write_policy(
 
 
 def _get_topics_by_role(topics: Dict) -> Tuple[Dict, Dict]:
+    """
+    Split the dictionary of all topics into two dictionaries for publish/subscribe topics.
+
+    :param topics: Dictionary representing all topics in a NoDL description.
+    :type topics: Dict
+    :return: A tuple of dictionaries, one for published topics, and one for subscribed topics.
+    :rtype: Tuple[Dict, Dict]
+    """
     subscribe_topics = {}
     publish_topics = {}
     for _, topic in topics.items():
@@ -165,6 +269,14 @@ def _get_topics_by_role(topics: Dict) -> Tuple[Dict, Dict]:
 
 
 def _get_services_by_role(services: Dict) -> Tuple[Dict, Dict]:
+    """
+    Split the dictionary of all services into two dictionaries for reply/request services.
+
+    :param services: Dictionary representing all services in a NoDL description.
+    :type services: Dict
+    :return: A tuple of dictionaries, one for reply services, and one for request services.
+    :rtype: Tuple[Dict, Dict]
+    """
     reply_services = {}
     request_services = {}
     for _, service in services.items():
@@ -180,4 +292,12 @@ def _get_services_by_role(services: Dict) -> Tuple[Dict, Dict]:
 
 
 def _get_actions_by_role(actions: Dict) -> Tuple[Dict, Dict]:
+    """
+    Split the dictionary of all actions into two dictionaries for client/server actions.
+
+    :param actions: Dictionary representing all actions in a NoDL description.
+    :type actions: Dict
+    :return: A tuple of dictionaries, one for client actions, and one for server actions.
+    :rtype: Tuple[Dict, Dict]
+    """
     return _get_services_by_role(actions)  # `nodl.types.Action` also share ServerClientRole enums
