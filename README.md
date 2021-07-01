@@ -8,7 +8,7 @@ This repository contains tooling to generate a [ROS 2 Access Control Policy](htt
 
 ## Building
 
-* Clone this repository to a ROS workspace: `git clone git@github.com:aprotyas/nodl_to_policy.git <ws/src>/nodl_to_policy`
+* Clone this repository to a ROS workspace: `git clone git@github.com:osrf/nodl_to_policy.git <ws/src>/nodl_to_policy`
 * Install required dependencies: `rosdep install -yri --from-paths <ws/src> --rosdistro=galactic`
 * Build with: `colcon build --symlink-install`
 

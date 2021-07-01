@@ -15,8 +15,8 @@
 import argparse
 from typing import Any, List, Optional
 
-from ros2cli.command import CommandExtension
 from ros2cli.command import add_subparsers_on_demand
+from ros2cli.command import CommandExtension
 
 
 class _NoDLToPolicyCommand(CommandExtension):
@@ -36,8 +36,7 @@ class _NoDLToPolicyCommand(CommandExtension):
         )
 
     def main(self, *, parser: argparse.ArgumentParser, args: Any) -> int:
-        """Delegating to a verb's entrypoint, unless no verb was passed."""
-
+        """Delegate to a verb's entrypoint, unless no verb was passed."""
         if not hasattr(args, '_verb'):
             # in case no verb was passed
             self._subparser.print_help()

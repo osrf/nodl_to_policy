@@ -14,9 +14,9 @@
 
 import argparse
 
-import pytest
-from nodl_to_policy._verb import _convert
 import nodl
+from nodl_to_policy._verb import _convert
+import pytest
 
 
 @pytest.fixture

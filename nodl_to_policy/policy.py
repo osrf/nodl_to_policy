@@ -25,15 +25,15 @@ from nodl.types import (
 )
 
 from nodl_to_policy._common._profile import (
-    common_subscribe_topics,
     common_publish_topics,
     common_reply_services,
     common_request_services,
+    common_subscribe_topics,
 )
 
 from sros2.policy import (
-    POLICY_VERSION,
     dump_policy,
+    POLICY_VERSION,
 )
 
 
@@ -69,7 +69,6 @@ def get_profile(policy: etree._ElementTree, node_name: str) -> etree._ElementTre
     if enclave is None:
         enclave = etree.Element('enclave')
         # unqualified enclave path for now, refer to security enclaves design article
-        # TODO(aprotyas): Verify that this is how enclave paths should work
         enclave.attrib['path'] = '/'
         profiles = etree.Element('profiles')
         enclave.append(profiles)
@@ -80,7 +79,6 @@ def get_profile(policy: etree._ElementTree, node_name: str) -> etree._ElementTre
     if profile is None:
         profile = etree.Element('profile')
         # namespace information not provided in NoDL description yet
-        # TODO(aprotyas): Verify that this is how node namespaces should work
         profile.attrib['ns'] = '/'
         profile.attrib['node'] = node_name
         profiles = enclave.find('profiles')

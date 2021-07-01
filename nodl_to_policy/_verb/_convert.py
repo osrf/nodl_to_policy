@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from argcomplete.completers import FilesCompleter
 import argparse
 import pathlib
 import sys
 
+from argcomplete.completers import FilesCompleter
 import nodl
 from nodl._index import _FILE_EXTENSION as _NODL_FILE_EXTENSION
 from nodl_to_policy.policy import (
@@ -27,7 +27,7 @@ from ros2cli.verb import VerbExtension
 
 
 class _ConvertVerb(VerbExtension):
-    """Convert NoDL XML documents to ROS 2 Access Control Policies"""
+    """Convert NoDL XML documents to ROS 2 Access Control Policies."""
 
     def add_arguments(self, parser: argparse.ArgumentParser, cli_name: None = None) -> None:
         """Argument addition for the `convert` verb."""

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from typing import List
+
 from lxml import etree
 try:
     import importlib.resources as importlib_resources
@@ -20,8 +21,6 @@ except ModuleNotFoundError:
     import importlib_resources  # type: ignore
 
 
-# TODO(aprotyas): Make use of `NodeType` here once the
-# presence/absence of lifecycle nodes are established
 # For now, only use `node.xml`, since NoDL does not describe Lifecycle nodes
 def common_profile() -> etree.ElementTree:
     return _get_profile('node.xml')

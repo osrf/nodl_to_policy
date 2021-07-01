@@ -1,5 +1,6 @@
-from setuptools import setup
 import os
+
+from setuptools import setup
 
 
 def package_files(directory):
@@ -32,8 +33,8 @@ setup(
     author_email='abrar@openrobotics.org',
     maintainer='Abrar Rahman Protyasha',
     maintainer_email='abrar@openrobotics.org',
-    url='https://github.com/aprotyas/nodl_to_policy',
-    download_url='https://github.com/aprotyas/nodl_to_policy/releases',
+    url='https://github.com/osrf/nodl_to_policy',
+    download_url='https://github.com/osrf/nodl_to_policy/releases',
     keywords=['ROS'],
     classifiers=[
         'Environment :: Console',
