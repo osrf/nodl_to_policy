@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pathlib
 import sys
 from typing import Dict, List, Tuple, Union
 
@@ -35,32 +34,24 @@ from nodl_to_policy._common._profile import (
 from sros2.policy import (
     POLICY_VERSION,
     dump_policy,
-    load_policy,
 )
 
 
 _POLICY_FILE_EXTENSION = '.policy.xml'
 
 
-def get_policy(policy_file_path: pathlib.Path) -> etree._ElementTree:
+def init_policy() -> etree._ElementTree:
     """
-    Load (or creates) a policy element in an LXML ElementTree.
+    Create a policy element in an LXML ElementTree.
 
-    :param policy_file_path: POSIX path of the policy file.
-    :type policy_file_path: pathlib.Path
-    :raises FileNotFoundError: If the given path is not a file.
-    :raises RuntimeError: If the policy file is invalid.
     :return: LXML ElementTree structure representing a "policy" tag.
     :rtype: etree._ElementTree
     """
-    if policy_file_path.is_file():
-        return load_policy(policy_file_path)
-    else:
-        enclaves = etree.Element('enclaves')
-        policy = etree.Element('policy')
-        policy.attrib['version'] = POLICY_VERSION
-        policy.append(enclaves)
-        return policy
+    enclaves = etree.Element('enclaves')
+    policy = etree.Element('policy')
+    policy.attrib['version'] = POLICY_VERSION
+    policy.append(enclaves)
+    return policy
 
 
 def get_profile(policy: etree._ElementTree, node_name: str) -> etree._ElementTree:
@@ -184,22 +175,16 @@ def add_common_permissions(profile: etree._ElementTree, node: Node) -> None:
                 [item.text for item in allowed_items])
 
 
-def convert_to_policy(
-    policy_file_path: pathlib.Path, nodl_description: List[Node]
-) -> etree._ElementTree:
+def convert_to_policy(nodl_description: List[Node]) -> etree._ElementTree:
     """
     Handle the main logic for conversion from NoDL description to access control policy.
 
-    :param policy_file_path: POSIX path of the policy file.
-    :type policy_file_path: pathlib.Path
     :param nodl_description: The list of `nodl.Node` objects to add to the policy.
     :type nodl_description: List[nodl.Node]
-    :raises FileNotFoundError: If the given path is not a file.
-    :raises RuntimeError: If the policy file is invalid.
     :return: LXML ElementTree structure representing a completed "policy" tag.
     :rtype: etree._ElementTree
     """
-    policy = get_policy(policy_file_path)
+    policy = init_policy()
 
     for node in nodl_description:
         # Profile: need to find enclave path and node namespace somehow
@@ -224,24 +209,15 @@ def convert_to_policy(
     return policy
 
 
-def write_policy(
-    policy_file_path: pathlib.Path, policy: etree._ElementTree, print_policy: bool
-) -> None:
+def print_policy(policy: etree._ElementTree) -> None:
     """
-    Write a generated policy ElementTree to an XML file, and optionally to the console.
+    Print a generated policy ElementTree to the console standard output.
 
-    :param policy_file_path: POSIX path of the policy file.
-    :type policy_file_path: pathlib.Path
     :param policy: LXML ElementTree structure representing a completed "policy" tag.
     :type policy: etree._ElementTree
-    :param print_policy: Flag to determine whether converted policy gets dumped to `stdout`
-    :type print_policy: bool
     :raises RuntimeError: If the policy structure is invalid.
     """
-    with open(policy_file_path, 'w') as stream:
-        dump_policy(policy, stream)
-    if print_policy:
-        dump_policy(policy, sys.stdout)
+    dump_policy(policy, stream=sys.stdout)
 
 
 def _get_topics_by_role(topics: Dict) -> Tuple[Dict, Dict]:

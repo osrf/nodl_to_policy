@@ -30,8 +30,3 @@ def test_nodl_invalid():
 @pytest.fixture
 def test_policy():
     return Path(__file__).parents[1] / 'test.policy.xml'
-
-
-@pytest.fixture
-def test_policy_invalid():
-    return Path(__file__).parents[1] / 'test_invalid.policy.xml'
