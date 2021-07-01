@@ -170,19 +170,18 @@ def add_common_permissions(profile: etree._ElementTree, node: Node) -> None:
     :type node: nodl.types.Node
     """
     permission_and_rule_types = {
-        'topic': ({'subscribe': common_subscribe_topics()}, {'publish': common_publish_topics()}),
-        'service': ({'reply': common_reply_services()}, {'request': common_request_services()})}
+        'topic': {'subscribe': common_subscribe_topics(), 'publish': common_publish_topics()},
+        'service': {'reply': common_reply_services(), 'request': common_request_services()}}
 
     # For each of the default 'topic'/'service', add that tag under the appropriate permissions tag
-    for permission_type, rule_types in permission_and_rule_types.items():
-        for rule_type_dict in rule_types:
-            for rule_type, allowed_items in rule_type_dict.items():
-                add_permission(
-                    profile,
-                    node,
-                    permission_type,
-                    rule_type,
-                    [item.text for item in allowed_items])
+    for permission_type, rules_and_items in permission_and_rule_types.items():
+        for rule_type, allowed_items in rules_and_items.items():
+            add_permission(
+                profile,
+                node,
+                permission_type,
+                rule_type,
+                [item.text for item in allowed_items])
 
 
 def convert_to_policy(
@@ -214,14 +213,13 @@ def convert_to_policy(
         reply_actions, request_actions = _get_actions_by_role(node.actions)
 
         permission_and_rule_types = {
-            'topic': ({'subscribe': subscribe_topics}, {'publish': publish_topics}),
-            'service': ({'reply': reply_services}, {'request': request_services}),
-            'action': ({'execute': reply_actions}, {'call': request_actions})}
+            'topic': {'subscribe': subscribe_topics, 'publish': publish_topics},
+            'service': {'reply': reply_services, 'request': request_services},
+            'action': {'execute': reply_actions, 'call': request_actions}}
 
-        for permission_type, rule_types in permission_and_rule_types.items():
-            for rule_type_dict in rule_types:
-                for rule_type, allowed_items in rule_type_dict.items():
-                    add_permission(profile, node, permission_type, rule_type, allowed_items)
+        for permission_type, rules_and_items in permission_and_rule_types.items():
+            for rule_type, allowed_items in rules_and_items.items():
+                add_permission(profile, node, permission_type, rule_type, allowed_items)
 
     return policy
 
