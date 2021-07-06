@@ -21,7 +21,7 @@ except ModuleNotFoundError:
     import importlib_resources  # type: ignore
 
 
-# For now, only use `node.xml`, since NoDL does not describe Lifecycle nodes
+# TODO(aprotyas): For now, only use `node.xml`, since NoDL does not describe Lifecycle nodes
 def common_profile() -> etree.ElementTree:
     return _get_profile('node.xml')
 
@@ -43,8 +43,6 @@ def common_request_services() -> List:
 
 
 def _get_profile(filename: str) -> etree.ElementTree:
-    # Parses the `node.xml` or the `lifecycle_node.xml` file
-    # The latter filename is WIP, check TODO above in source
     with importlib_resources.path('nodl_to_policy._common', filename) as path:
         profile = etree.parse(str(path))
     profile.xinclude()
