@@ -56,7 +56,6 @@ class _ConvertVerb(VerbExtension):
             print(e, file=sys.stderr)
             return 1
 
-        policy = convert_to_policy(nodl_description)
-        print_policy(policy)
+        print_policy(convert_to_policy(nodl_description))
 
         return 0
