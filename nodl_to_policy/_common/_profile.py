@@ -51,6 +51,9 @@ def _get_profile(filename: str) -> etree.ElementTree:
 
 def _get_items_by_role(item_type: str, role: str) -> List:
     items_list = []
+    # Terminate the function for empty queries, prevents predicate errors in the find operation
+    if not item_type or not role:
+        return items_list
     # Find `item_type` (topic/service) tags with an allowed `role` (pub/sub/reply/req) attribute
     for items in common_profile().findall(f'{item_type}[@{role}="ALLOW"]'):
         # Child tags are: topics -> topic, services -> service
