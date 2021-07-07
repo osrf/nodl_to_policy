@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
-
 from lxml import etree
 from lxml.builder import E
 import nodl_to_policy._common._profile as common_profile
+import pytest
 
 
 def test_common_profile(mocker):
@@ -133,10 +132,7 @@ def test__get_items_by_role_empty_request():
 
 
 def test__get_items_by_role_no_items():
-    """
-    Test that `_get_items_by_role` correctly returns an empty list for non-existent
-    `item_type`/`role` combinations.
-    """
+    """Test that `_get_items_by_role` returns an empty list for non-existent combinations."""
     assert not common_profile._get_items_by_role('actions', 'reply')
 
 

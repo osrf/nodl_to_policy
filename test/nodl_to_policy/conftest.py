@@ -14,8 +14,8 @@
 
 from pathlib import Path
 
-from lxml.builder import E
 from lxml import etree
+from lxml.builder import E
 import pytest
 
 
@@ -69,6 +69,7 @@ def empty_nodl_path(tmp_path):
 
 
 class Helpers:
+
     @staticmethod
     def text_equal(s1: str, s2: str) -> bool:
         """Accounting for whitespaces, return True if two pieces of text are equivalent."""
