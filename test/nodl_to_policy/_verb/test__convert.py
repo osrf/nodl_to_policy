@@ -31,11 +31,11 @@ def parser(verb):
     return parser
 
 
-def test_accepts_valid_nodl_path(mocker, parser, test_nodl, verb):
+def test_accepts_valid_nodl_path(mocker, parser, test_nodl_path, verb):
     mocker.patch('nodl_to_policy._verb._convert.convert_to_policy')
     mocker.patch('nodl_to_policy._verb._convert.print_policy')
 
-    args = parser.parse_args([str(test_nodl)])
+    args = parser.parse_args([str(test_nodl_path)])
     assert not verb.main(args=args)
 
 
@@ -54,18 +54,18 @@ def test_fails_sneaky_dir(mocker, parser, tmp_path, verb):
     assert verb.main(args=args)
 
 
-def test_accepts_valid_nodl(mocker, parser, test_nodl, verb):
-    args = parser.parse_args([str(test_nodl)])
+def test_accepts_valid_nodl(mocker, parser, test_nodl_path, verb):
+    args = parser.parse_args([str(test_nodl_path)])
 
     assert not verb.main(args=args)
 
 
-def test_fails_invalid_nodl(mocker, parser, test_nodl_invalid, verb):
+def test_fails_invalid_nodl(mocker, parser, test_nodl_invalid_path, verb):
     # Check that the NoDL parser throws with an invalid NoDL file
     mocker.patch(
         'nodl_to_policy._verb._convert.nodl.parse',
         side_effect=nodl.errors.InvalidNoDLError(mocker.MagicMock()),
     )
-    args = parser.parse_args([str(test_nodl_invalid)])
+    args = parser.parse_args([str(test_nodl_invalid_path)])
 
     assert verb.main(args=args)

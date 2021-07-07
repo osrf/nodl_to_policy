@@ -22,7 +22,7 @@ except ModuleNotFoundError:
 
 
 # TODO(aprotyas): For now, only use `node.xml`, since NoDL does not describe Lifecycle nodes
-def common_profile() -> etree.ElementTree:
+def common_profile() -> etree._ElementTree:
     return _get_profile('node.xml')
 
 
@@ -42,15 +42,15 @@ def common_request_services() -> List:
     return _get_items_by_role('services', 'request')
 
 
-def _get_profile(filename: str) -> etree.ElementTree:
+def _get_profile(filename: str) -> etree._ElementTree:
     with importlib_resources.path('nodl_to_policy._common', filename) as path:
         profile = etree.parse(str(path))
     profile.xinclude()
     return profile
 
 
-def _get_items_by_role(item_type: str, role: str) -> List:
-    items_list = []
+def _get_items_by_role(item_type: str, role: str) -> List[etree._ElementTree]:
+    items_list: List[etree._ElementTree] = []
     # Terminate the function for empty queries, prevents predicate errors in the find operation
     if not item_type or not role:
         return items_list

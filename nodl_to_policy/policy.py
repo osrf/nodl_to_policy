@@ -87,7 +87,7 @@ def get_profile(policy: etree._ElementTree, node_name: str) -> etree._ElementTre
     return profile
 
 
-def get_permission(
+def get_permissions(
     profile: etree._ElementTree, permission_type: str, rule_type: str,
     rule_expression: str
 ) -> etree._ElementTree:
@@ -113,7 +113,7 @@ def get_permission(
     return permissions
 
 
-def add_permission(
+def add_permissions(
     profile: etree._ElementTree, node: Node, permission_type: str, rule_type: str,
     expressions: Union[Dict, List]
 ) -> None:
@@ -135,7 +135,7 @@ def add_permission(
     if not expressions:
         return
     # get permission
-    permissions = get_permission(profile, permission_type, rule_type, 'ALLOW')
+    permissions = get_permissions(profile, permission_type, rule_type, 'ALLOW')
 
     # add permission
     for expression_name in expressions:
@@ -146,12 +146,14 @@ def add_permission(
             permission.text = expression_name[len('/'):]
         else:
             permission.text = expression_name
+        if permission.text in [expression.text for expression in permissions]:
+            continue
         permissions.append(permission)
 
 
 def add_common_permissions(profile: etree._ElementTree, node: Node) -> None:
     """
-    `add_permission` but for each of the common services/topics/actions.
+    `add_permissions` for each of the common services/topics/actions.
 
     :param profile: LXML ElementTree structure representing a "policy" tag.
     :type policy: etree._ElementTree
@@ -165,7 +167,7 @@ def add_common_permissions(profile: etree._ElementTree, node: Node) -> None:
     # For each of the default 'topic'/'service', add that tag under the appropriate permissions tag
     for permission_type, rules_and_items in permission_and_rule_types.items():
         for rule_type, allowed_items in rules_and_items.items():
-            add_permission(
+            add_permissions(
                 profile,
                 node,
                 permission_type,
@@ -202,7 +204,7 @@ def convert_to_policy(nodl_description: List[Node]) -> etree._ElementTree:
 
         for permission_type, rules_and_items in permission_and_rule_types.items():
             for rule_type, allowed_items in rules_and_items.items():
-                add_permission(profile, node, permission_type, rule_type, allowed_items)
+                add_permissions(profile, node, permission_type, rule_type, allowed_items)
 
     return policy
 
