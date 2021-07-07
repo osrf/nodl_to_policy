@@ -81,7 +81,6 @@ def get_profile(policy: etree._ElementTree, node_name: str) -> etree._ElementTre
         # namespace information not provided in NoDL description yet
         profile.attrib['ns'] = '/'
         profile.attrib['node'] = node_name
-        profile.attrib['ns'] = '/'
         profiles = enclave.find('profiles')
         profiles.append(profile)
 

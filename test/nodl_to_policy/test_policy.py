@@ -51,9 +51,9 @@ def test_get_profile_minimal():
     # check that a single profile tag was created
     assert len(test_profiles) == 1
     assert test_profiles[0] == test_profile
-    test_profile.tag == 'profile'
-    test_profile.attrib['ns'] == '/'
-    test_profile.attrib['node'] == 'foo'
+    assert test_profile.tag == 'profile'
+    assert test_profile.attrib['ns'] == '/'
+    assert test_profile.attrib['node'] == 'foo'
     assert len(test_profile) == 0
 
 
@@ -88,9 +88,9 @@ def test_get_profile_exists(test_policy_tree):
 
     # check that a <profile node='node1'> tag exists as expected
     assert test_profiles.find(path=f'profile[@ns="/"][@node="node_1"]') == test_profile
-    test_profile.tag == 'profile'
-    test_profile.attrib['ns'] == '/'
-    test_profile.attrib['node'] == 'node_1'
+    assert test_profile.tag == 'profile'
+    assert test_profile.attrib['ns'] == '/'
+    assert test_profile.attrib['node'] == 'node_1'
     assert len(test_profile) == 4  # four child tags in the <profile node="node_1> tree
 
 
