@@ -153,7 +153,7 @@ def add_permissions(
 
 def add_common_permissions(profile: etree._ElementTree, node: Node) -> None:
     """
-    `add_permissions` but for each of the common services/topics/actions.
+    `add_permissions` for each of the common services/topics/actions.
 
     :param profile: LXML ElementTree structure representing a "policy" tag.
     :type policy: etree._ElementTree
