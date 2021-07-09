@@ -83,7 +83,7 @@ def test_get_profile_exists(test_policy_tree):
 
     # check that a single profiles tag exists
     assert test_enclave[0] == test_profiles
-    assert len(test_profiles) == 1  # two nodes, one profile tag for each
+    assert len(test_profiles) == 1  # one node per enclave, one profile tag for each
     assert test_profiles.tag == 'profiles'
 
     # check that a <profile node='node1'> tag exists as expected
