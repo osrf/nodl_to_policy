@@ -65,11 +65,13 @@ def get_profile(policy: etree._ElementTree, node_name: str) -> etree._ElementTre
     :return: LXML ElementTree structure representing a "profile" tag.
     :rtype: etree._ElementTree
     """
-    enclave = policy.find(path=f'enclaves/enclave[@path="/"]')
+    # Every node is assumed to be in its own enclave
+    # This assumption is needed since the NoDL description does not specify enclave paths
+    # Moreover, this assumption is better than placing all nodes in the base "/" path
+    enclave = policy.find(path=f'enclaves/enclave[@path="/{node_name}"]')
     if enclave is None:
         enclave = etree.Element('enclave')
-        # unqualified enclave path for now, refer to security enclaves design article
-        enclave.attrib['path'] = '/'
+        enclave.attrib['path'] = f'/{node_name}'
         profiles = etree.Element('profiles')
         enclave.append(profiles)
         enclaves = policy.find('enclaves')
