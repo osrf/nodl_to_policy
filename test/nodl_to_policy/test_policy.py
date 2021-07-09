@@ -42,7 +42,7 @@ def test_get_profile_minimal():
     # check that a single enclave tag was created
     assert len(test_enclaves) == 1
     assert test_enclave.tag == 'enclave'
-    assert test_enclave.attrib['path'] == '/'
+    assert test_enclave.attrib['path'] == '/foo'
 
     # check that a single profiles tag was created
     assert len(test_enclave) == 1
@@ -66,24 +66,24 @@ def test_get_profile_exists(test_policy_tree):
     """
     test_policy = test_policy_tree
     test_enclaves = test_policy.find(path='enclaves')
-    test_enclave = test_enclaves.find(path=f'enclave[@path="/"]')
+    test_enclave = test_enclaves.find(path=f'enclave[@path="/node_1"]')
     test_profiles = test_enclave.find(path='profiles')
     test_profile = policy.get_profile(test_policy, node_name='node_1')
 
     # check that a single enclaves tag exists
     assert test_policy[0] == test_enclaves
-    assert len(test_enclaves) == 1  # check that 'enclaves' tree contains one child ('enclave')
+    assert len(test_enclaves) == 2  # check that 'enclaves' tree contains two children
     assert test_enclaves.tag == 'enclaves'
 
     # check that a single enclave tag exists
     assert test_enclaves[0] == test_enclave
     assert len(test_enclave) == 1  # check that 'enclave' tree contains one child ('profiles')
     assert test_enclave.tag == 'enclave'
-    assert test_enclave.attrib['path'] == '/'
+    assert test_enclave.attrib['path'] == '/node_1'
 
     # check that a single profiles tag exists
     assert test_enclave[0] == test_profiles
-    assert len(test_profiles) == 2  # two nodes, one profile tag for each
+    assert len(test_profiles) == 1  # two nodes, one profile tag for each
     assert test_profiles.tag == 'profiles'
 
     # check that a <profile node='node1'> tag exists as expected
@@ -118,7 +118,7 @@ def test_get_permissions_exists(test_policy_tree):
     `get_profile` function does not alter an existing policy tree.
     """
     test_profile = test_policy_tree.find(
-        path='enclaves/enclave[@path="/"]/profiles/profile[@ns="/"][@node="node_1"]')
+        path='enclaves/enclave[@path="/node_1"]/profiles/profile[@ns="/"][@node="node_1"]')
     test_permissions = policy.get_permissions(
         profile=test_profile,
         permission_type='topic',
@@ -171,7 +171,7 @@ def test_add_permissions_minimal():
 def test_add_permissions_exists(test_policy_tree):
     """Test a profile tree with pre-existing permissions."""
     test_profile = test_policy_tree.find(
-        path='enclaves/enclave[@path="/"]/profiles/profile[@ns="/"][@node="node_1"]')
+        path='enclaves/enclave[@path="/node_1"]/profiles/profile[@ns="/"][@node="node_1"]')
 
     policy.add_permissions(
         profile=test_profile,
@@ -202,14 +202,14 @@ def test_add_common_permissions_minimal(helpers, common_profile_tree):
 def test_add_common_permissions_exists(helpers, test_policy_tree):
     """Test addition of common permissions to a profile tree with pre-existing permission tags."""
     test_profile = test_policy_tree.find(
-        path='enclaves/enclave[@path="/"]/profiles/profile[@ns="/"][@node="node_1"]')
+        path='enclaves/enclave[@path="/node_1"]/profiles/profile[@ns="/"][@node="node_1"]')
     policy.add_common_permissions(
         test_profile, node=nodl.types.Node(name='node', executable='prog'))
 
     assert helpers.xml_trees_equal(
         test_profile,
         test_policy_tree.find(
-            path='enclaves/enclave[@path="/"]/profiles/profile[@ns="/"][@node="node_1"]')
+            path='enclaves/enclave[@path="/node_1"]/profiles/profile[@ns="/"][@node="node_1"]')
     )
 
 
