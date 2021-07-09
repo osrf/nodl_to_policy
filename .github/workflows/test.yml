@@ -1,0 +1,54 @@
+name: Test nodl_to_policy
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  # ros-tooling/setup-ros reports missing `colcon` with
+  # actions/checkout, so using a docker based build solution for now
+  docker-build-and-test:
+    runs-on: ubuntu-20.04
+    container:
+      image: ros:galactic
+    steps:
+      - name: Preparation
+        run: |
+          apt-get -qq update
+          apt-get -qq upgrade -y
+          apt-get install curl -y
+          colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/1ddb69bedfd1f04c2f000e95452f7c24a4d6176b/index.yaml
+          colcon mixin update default
+          mkdir -p src
+
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+        with:
+          path: src/
+
+      - run: cp src/codecov.yml .
+
+      - name: Install dependencies
+        run: DEBIAN_FRONTEND=noninteractive rosdep update && rosdep install --from-paths src --ignore-src --rosdistro galactic -y
+
+      - name: Build package
+        run: . /opt/ros/$ROS_DISTRO/setup.sh && colcon build --event-handlers console_cohesion+ --mixin coverage-pytest --packages-select nodl_to_policy --merge-install
+
+      - name: Run tests
+        id: action_ros_ci_step
+        run: . /opt/ros/$ROS_DISTRO/setup.sh && colcon test --merge-install --mixin coverage-pytest --packages-select nodl_to_policy --return-code-on-test-failure --event-handlers console_cohesion+
+
+      - name: Codecov
+        uses: codecov/codecov-action@v1.5.2
+        with:
+          file: build/nodl_to_policy/coverage.xml
+          fail_ci_if_error: true
+          flags: nodl_to_policy
+          name: codecov-nodl_to_policy
+
+      - name: Upload Logs
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: colcon-logs-linux
+          path: log/
+        if: always()
