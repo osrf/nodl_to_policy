@@ -22,7 +22,7 @@ jobs:
           mkdir -p src
 
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2
         with:
           path: src/
 
@@ -39,7 +39,7 @@ jobs:
         run: . /opt/ros/$ROS_DISTRO/setup.sh && colcon test --merge-install --mixin coverage-pytest --packages-select nodl_to_policy --return-code-on-test-failure --event-handlers console_cohesion+
 
       - name: Codecov
-        uses: codecov/codecov-action@v1.5.2
+        uses: codecov/codecov-action@v1
         with:
           file: build/nodl_to_policy/coverage.xml
           fail_ci_if_error: true
@@ -47,7 +47,7 @@ jobs:
           name: codecov-nodl_to_policy
 
       - name: Upload Logs
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v2
         with:
           name: colcon-logs-linux
           path: log/
