@@ -1,15 +1,2 @@
 fixes:
-  - "src/::"
-coverage:
-  status:
-    project:
-      default:
-        flags:
-          - nodl_to_policy
-      nodl_to_policy:
-        flags:
-          - nodl_to_policy
-flags:
-  nodl_to_policy:
-    paths:
-      - nodl_to_policy
+  - "ros_ws/src/*/nodl_to_policy/::"
