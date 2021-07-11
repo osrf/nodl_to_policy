@@ -1,54 +1,59 @@
-name: Test nodl_to_policy
+name: nodl_to_policy
 
 on:
   pull_request:
   push:
+    branches:
+      - master
 
 jobs:
-  # ros-tooling/setup-ros reports missing `colcon` with
-  # actions/checkout, so using a docker based build solution for now
-  docker-build-and-test:
-    runs-on: ubuntu-20.04
-    container:
-      image: ros:galactic
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-20.04
+        ros_distribution:
+          - galactic
     steps:
-      - name: Preparation
-        run: |
-          apt-get -qq update
-          apt-get -qq upgrade -y
-          apt-get install curl -y
-          colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/1ddb69bedfd1f04c2f000e95452f7c24a4d6176b/index.yaml
-          colcon mixin update default
-          mkdir -p src
-
-      - name: Checkout
-        uses: actions/checkout@v2
+      # actions/checkout is not used because of a known issue where `colcon` cannot be found
+      # https://github.com/ros-tooling/setup-ros/issues/75
+      - name: Setup ROS2
+        uses: ros-tooling/setup-ros@v0.2
         with:
-          path: src/
+          use-ros2-testing: true
+          required-ros-distributions: ${{ matrix.ros_distribution }}
 
-      - run: cp src/codecov.yml .
+      - name: Test nodl_to_policy
+        uses: ros-tooling/action-ros-ci@v0.2
+        id: action_ros_ci
+        with:
+          package-name: nodl_to_policy
+          colcon-defaults: |
+            {
+              "test": {
+                "mixin": ["coverage-pytest"]
+              }
+            }
+          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/1ddb69bedfd1f04c2f000e95452f7c24a4d6176b/index.yaml
+          target-ros2-distro: ${{ matrix.ros_distribution }}
 
-      - name: Install dependencies
-        run: DEBIAN_FRONTEND=noninteractive rosdep update && rosdep install --from-paths src --ignore-src --rosdistro galactic -y
+      # `outputs.root_dir` is set to the relative path of the checked out git repository
+      - name: Find project root
+        id: find_project
+        run: echo "::set-output name=root_dir::$(vcs diff -s --repos . | cut -d ' ' -f 1)"
 
-      - name: Build package
-        run: . /opt/ros/$ROS_DISTRO/setup.sh && colcon build --event-handlers console_cohesion+ --mixin coverage-pytest --packages-select nodl_to_policy --merge-install
-
-      - name: Run tests
-        id: action_ros_ci_step
-        run: . /opt/ros/$ROS_DISTRO/setup.sh && colcon test --merge-install --mixin coverage-pytest --packages-select nodl_to_policy --return-code-on-test-failure --event-handlers console_cohesion+
-
-      - name: Codecov
+      - name: Codecov report
         uses: codecov/codecov-action@v1
         with:
-          file: build/nodl_to_policy/coverage.xml
+          files: ${{ steps.action_ros_ci.outputs.ros-workspace-directory-name }}/build/nodl_to_policy/coverage.xml
+          root_dir: ${{ steps.find_project.outputs.root_dir }}  # `codecov.yml` file found here
           fail_ci_if_error: true
-          flags: nodl_to_policy
           name: codecov-nodl_to_policy
 
       - name: Upload Logs
         uses: actions/upload-artifact@v2
         with:
-          name: colcon-logs-linux
-          path: log/
+          name: colcon_logs
+          path: ${{ steps.action_ros_ci.outputs.ros-workspace-directory-name }}/log
         if: always()
