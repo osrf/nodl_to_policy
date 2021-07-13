@@ -38,19 +38,6 @@ jobs:
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/1ddb69bedfd1f04c2f000e95452f7c24a4d6176b/index.yaml
           target-ros2-distro: ${{ matrix.ros_distribution }}
 
-      # `outputs.root_dir` is set to the relative path of the checked out git repository
-      - name: Find project root
-        id: find_project
-        run: echo "::set-output name=root_dir::$(vcs diff -s --repos . | cut -d ' ' -f 1)"
-
-      - name: Codecov report
-        uses: codecov/codecov-action@v1
-        with:
-          files: ${{ steps.action_ros_ci.outputs.ros-workspace-directory-name }}/build/nodl_to_policy/coverage.xml
-          root_dir: ${{ steps.find_project.outputs.root_dir }}  # `codecov.yml` file found here
-          fail_ci_if_error: true
-          name: codecov-nodl_to_policy
-
       - name: Upload Logs
         uses: actions/upload-artifact@v2
         with:

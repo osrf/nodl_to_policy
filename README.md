@@ -2,7 +2,6 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build status](https://github.com/osrf/nodl_to_policy/actions/workflows/test.yml/badge.svg)](https://github.com/osrf/nodl_to_policy/actions/workflows/test.yml)
-[![Code coverage](https://codecov.io/gh/osrf/nodl_to_policy/branch/master/graph/badge.svg)](https://codecov.io/gh/osrf/nodl_to_policy)
 
 This repository contains tooling to generate a [ROS 2 Access Control Policy](https://design.ros2.org/articles/ros2_access_control_policies.html) from the [Node Interface Definition Language (NoDL)](https://github.com/ros2/design/pull/266) description of a ROS system (or that of a specific package), primarily to be used in conjunction with the `SROS2` utilities.
 
