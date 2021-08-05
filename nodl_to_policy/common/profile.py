@@ -43,7 +43,7 @@ def common_request_services() -> List:
 
 
 def _get_profile(filename: str) -> etree._ElementTree:
-    with importlib_resources.path('nodl_to_policy._common', filename) as path:
+    with importlib_resources.path('nodl_to_policy.common', filename) as path:
         profile = etree.parse(str(path))
     profile.xinclude()
     return profile

@@ -13,7 +13,7 @@ def package_files(directory):
 
 
 extra_files = (
-    package_files('nodl_to_policy/_common')
+    package_files('nodl_to_policy/common')
 )
 
 package_name = 'nodl_to_policy'
@@ -52,10 +52,10 @@ setup(
         'console_scripts': [
         ],
         'ros2cli.command': [
-            'nodl_to_policy = nodl_to_policy._command._nodl_to_policy:_NoDLToPolicyCommand',
+            'nodl_to_policy = nodl_to_policy.command.nodl_to_policy:NoDLToPolicyCommand',
         ],
         'nodl_to_policy.verb': [
-            'convert = nodl_to_policy._verb._convert:_ConvertVerb'
+            'convert = nodl_to_policy.verb.convert:ConvertVerb'
         ]
     },
     package_data={

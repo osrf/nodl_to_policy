@@ -14,14 +14,14 @@
 
 from lxml import etree
 from lxml.builder import E
-import nodl_to_policy._common._profile as common_profile
+import nodl_to_policy.common.profile as common_profile
 import pytest
 
 
 def test_common_profile(mocker):
     """Test that the `common_profile` function makes a call to `_get_profile`, as expected."""
     common_profile_mock = mocker.patch(
-        'nodl_to_policy._common._profile._get_profile',
+        'nodl_to_policy.common.profile._get_profile',
         autospec=True)
     common_profile.common_profile()
     assert common_profile_mock.call_count == 1
@@ -30,7 +30,7 @@ def test_common_profile(mocker):
 def test_common_subscribe_topics(mocker):
     """Test that `common_subscribe_topics` calls `_get_items_by_role` correctly."""
     get_items_mock = mocker.patch(
-        'nodl_to_policy._common._profile._get_items_by_role',
+        'nodl_to_policy.common.profile._get_items_by_role',
         autospec=True)
     common_profile.common_subscribe_topics()
     assert get_items_mock.call_count == 1
@@ -40,7 +40,7 @@ def test_common_subscribe_topics(mocker):
 def test_common_publish_topics(mocker):
     """Test that `common_publish_topics` calls `_get_items_by_role` correctly."""
     get_items_mock = mocker.patch(
-        'nodl_to_policy._common._profile._get_items_by_role',
+        'nodl_to_policy.common.profile._get_items_by_role',
         autospec=True)
     common_profile.common_publish_topics()
     assert get_items_mock.call_count == 1
@@ -50,7 +50,7 @@ def test_common_publish_topics(mocker):
 def test_common_reply_services(mocker):
     """Test that `common_reply_services` calls `_get_items_by_role` correctly."""
     get_items_mock = mocker.patch(
-        'nodl_to_policy._common._profile._get_items_by_role',
+        'nodl_to_policy.common.profile._get_items_by_role',
         autospec=True)
     common_profile.common_reply_services()
     assert get_items_mock.call_count == 1
@@ -60,7 +60,7 @@ def test_common_reply_services(mocker):
 def test_common_request_services(mocker):
     """Test that `common_request_services` calls `_get_items_by_role` correctly."""
     get_items_mock = mocker.patch(
-        'nodl_to_policy._common._profile._get_items_by_role',
+        'nodl_to_policy.common.profile._get_items_by_role',
         autospec=True)
     common_profile.common_request_services()
     assert get_items_mock.call_count == 1
@@ -149,7 +149,7 @@ def simple_profile() -> etree._ElementTree:
 def test__get_items_by_role(mocker, simple_profile):
     """Test that `_get_items_by_role` returns the correct list of items for proper requests."""
     mocker.patch(
-        'nodl_to_policy._common._profile.common_profile',
+        'nodl_to_policy.common.profile.common_profile',
         return_value=simple_profile
     )
 

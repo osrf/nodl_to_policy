@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import nodl_to_policy._command._nodl_to_policy
+import nodl_to_policy.command.nodl_to_policy
 import pytest
 
 
 @pytest.fixture
 def command():
-    return nodl_to_policy._command._nodl_to_policy._NoDLToPolicyCommand()
+    return nodl_to_policy.command.nodl_to_policy.NoDLToPolicyCommand()
 
 
 def test_add_arguments_sets_subparser(mocker, command):

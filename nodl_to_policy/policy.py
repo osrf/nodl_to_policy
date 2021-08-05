@@ -24,7 +24,7 @@ from nodl.types import (
     ServerClientRole,
 )
 
-from nodl_to_policy._common._profile import (
+from nodl_to_policy.common.profile import (
     common_publish_topics,
     common_reply_services,
     common_request_services,
