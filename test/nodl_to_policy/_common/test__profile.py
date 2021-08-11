@@ -114,16 +114,16 @@ def test__get_profile(common_profile_tree):
 
     assert len(test_pub_topics) == len(pub_topics)
     print(test_pub_topics)
-    assert all([pub_topic in test_pub_topics for pub_topic in pub_topics])
+    assert all(pub_topic in test_pub_topics for pub_topic in pub_topics)
 
     assert len(test_sub_topics) == len(sub_topics)
-    assert all([sub_topic in test_sub_topics for sub_topic in sub_topics])
+    assert all(sub_topic in test_sub_topics for sub_topic in sub_topics)
 
     assert len(test_reply_services) == len(services)
-    assert all([service in test_reply_services for service in services])
+    assert all(service in test_reply_services for service in services)
 
     assert len(test_request_services) == len(services)
-    assert all([service in test_request_services for service in services])
+    assert all(service in test_request_services for service in services)
 
 
 def test__get_items_by_role_empty_request():

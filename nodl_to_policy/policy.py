@@ -148,7 +148,7 @@ def add_permissions(
             permission.text = expression_name[len('/'):]
         else:
             permission.text = expression_name
-        if permission.text in [expression.text for expression in permissions]:
+        if permission.text in (expression.text for expression in permissions):
             continue
         permissions.append(permission)
 

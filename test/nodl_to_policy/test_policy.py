@@ -185,7 +185,7 @@ def test_add_permissions_exists(test_policy_tree):
     assert test_permissions.attrib['publish'] == 'ALLOW'
     assert len(test_permissions) == 4
     test_permission_items = test_permissions.findall(path='topic')
-    assert 'item' in [item.text for item in test_permission_items]
+    assert 'item' in (item.text for item in test_permission_items)
 
 
 def test_add_common_permissions_minimal(helpers, common_profile_tree):
