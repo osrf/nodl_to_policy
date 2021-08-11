@@ -26,7 +26,7 @@ from nodl_to_policy.policy import (
 from ros2cli.verb import VerbExtension
 
 
-class _ConvertVerb(VerbExtension):
+class ConvertVerb(VerbExtension):
     """Convert NoDL XML documents to ROS 2 Access Control Policies."""
 
     def add_arguments(self, parser: argparse.ArgumentParser, cli_name: None = None) -> None:

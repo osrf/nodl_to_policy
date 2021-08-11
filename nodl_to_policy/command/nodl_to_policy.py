@@ -19,7 +19,7 @@ from ros2cli.command import add_subparsers_on_demand
 from ros2cli.command import CommandExtension
 
 
-class _NoDLToPolicyCommand(CommandExtension):
+class NoDLToPolicyCommand(CommandExtension):
     """Convert node interface descriptions exported from packages."""
 
     def add_arguments(

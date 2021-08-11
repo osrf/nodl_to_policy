@@ -15,13 +15,13 @@
 import argparse
 
 import nodl
-from nodl_to_policy._verb import _convert
+from nodl_to_policy.verb import convert
 import pytest
 
 
 @pytest.fixture
-def verb() -> _convert._ConvertVerb:
-    return _convert._ConvertVerb()
+def verb() -> convert.ConvertVerb:
+    return convert.ConvertVerb()
 
 
 @pytest.fixture
@@ -32,15 +32,15 @@ def parser(verb):
 
 
 def test_accepts_valid_nodl_path(mocker, parser, test_nodl_path, verb):
-    mocker.patch('nodl_to_policy._verb._convert.convert_to_policy')
-    mocker.patch('nodl_to_policy._verb._convert.print_policy')
+    mocker.patch('nodl_to_policy.verb.convert.convert_to_policy')
+    mocker.patch('nodl_to_policy.verb.convert.print_policy')
 
     args = parser.parse_args([str(test_nodl_path)])
     assert not verb.main(args=args)
 
 
 def test_fails_no_nodl_file(mocker, parser, tmp_path, verb):
-    mocker.patch('nodl_to_policy._verb._convert.pathlib.Path.cwd', return_value=tmp_path)
+    mocker.patch('nodl_to_policy.verb.convert.pathlib.Path.cwd', return_value=tmp_path)
 
     args = parser.parse_args([''])
     assert verb.main(args=args)
@@ -63,7 +63,7 @@ def test_accepts_valid_nodl(mocker, parser, test_nodl_path, verb):
 def test_fails_invalid_nodl(mocker, parser, test_nodl_invalid_path, verb):
     # Check that the NoDL parser throws with an invalid NoDL file
     mocker.patch(
-        'nodl_to_policy._verb._convert.nodl.parse',
+        'nodl_to_policy.verb.convert.nodl.parse',
         side_effect=nodl.errors.InvalidNoDLError(mocker.MagicMock()),
     )
     args = parser.parse_args([str(test_nodl_invalid_path)])
