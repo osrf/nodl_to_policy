@@ -5,8 +5,6 @@
 
 This repository contains tooling to generate a [ROS 2 Access Control Policy](https://design.ros2.org/articles/ros2_access_control_policies.html) from the [Node Interface Definition Language (NoDL)](https://github.com/ros2/design/pull/266) description of a ROS system (or that of a specific package), primarily to be used in conjunction with the `SROS2` utilities.
 
-*Note*: This package targets ROS 2 Galactic Geochelone.
-
 ## Building
 
 * Clone this repository to a ROS workspace: `git clone git@github.com:osrf/nodl_to_policy.git <ws/src>/nodl_to_policy`
